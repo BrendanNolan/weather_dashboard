@@ -40,13 +40,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (tx_results, rx_results) = std::sync::mpsc::channel();
     let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
-    tokio::spawn(networking::run_client(rx_county, tx_results));
+    let client = tokio::spawn(networking::run_client(rx_county, tx_results));
 
     let (tx_user_input, rx_user_input) = mpsc::channel();
 
     thread::spawn(move || run_user_event_loop(Duration::from_millis(200), tx_user_input));
     run_app_loop(rx_user_input, tx_county, rx_results)?;
 
+    client.await.unwrap();
     Ok(())
 }
 
