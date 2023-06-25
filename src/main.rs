@@ -4,6 +4,7 @@ mod tui_utils;
 mod widgets;
 
 use app_state::AppState;
+use connection_utils::ServerError;
 use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,
@@ -62,7 +63,7 @@ fn setup_logger() {
 fn run_app_loop(
     rx_user_input: StdReceiver<TickedUserInput>,
     tx_county: TokioSender<County>,
-    mut rx_server_results: TokioReceiver<(County, WeatherReport)>,
+    mut rx_server_results: TokioReceiver<Option<Result<(County, WeatherReport), ServerError>>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
     let mut terminal = create_terminal()?;
@@ -91,7 +92,7 @@ fn run_app_loop(
         }
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
-        if let Ok((county, report)) = rx_server_results.try_recv() {
+        if let Ok(Some(Ok((county, report)))) = rx_server_results.try_recv() {
             county_weather.insert(county, report);
         };
     }
