@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use ratatui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
+    text::{Span, Line},
     widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table},
 };
 
@@ -31,7 +31,7 @@ pub fn create_county_list_widget<'a>(all_counties: &[County]) -> List<'a> {
     let county_items: Vec<_> = all_counties
         .iter()
         .map(|county| {
-            ListItem::new(Spans::from(vec![Span::styled(
+            ListItem::new(Line::from(vec![Span::styled(
                 county.0.clone(),
                 Style::default(),
             )]))

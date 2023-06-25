@@ -21,7 +21,7 @@ use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    text::{Span, Spans},
+    text::{Span, Line},
     widgets::{Block, Borders, ListState, Tabs},
     Terminal,
 };
@@ -163,11 +163,11 @@ fn draw(
     );
 }
 
-fn create_menu<'a>() -> Vec<Spans<'a>> {
+fn create_menu<'a>() -> Vec<Line<'a>> {
     let menu_items = app_state::get_weather_type_strings();
     menu_items
         .iter()
-        .map(|t| Spans::from(vec![Span::styled(*t, Style::default())]))
+        .map(|t| Line::from(vec![Span::styled(*t, Style::default())]))
         .collect()
 }
 
@@ -208,7 +208,7 @@ fn create_weather_rects(parent_rect: &Rect) -> WeatherRects {
     }
 }
 
-fn create_weather_type_tabs(menu: Vec<Spans<'_>>) -> Tabs<'_> {
+fn create_weather_type_tabs(menu: Vec<Line<'_>>) -> Tabs<'_> {
     Tabs::new(menu)
         .block(Block::default().title("Weather Type").borders(Borders::ALL))
         .style(Style::default().fg(Color::White))
