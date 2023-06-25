@@ -23,7 +23,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tokio::sync::mpsc::Sender as TokioSender;
+use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
 use tracing::info;
 use tui_utils::{get_next_index, get_previous_index};
 use weather_dashboard::{
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal::enable_raw_mode()?;
 
-    let (tx_results, rx_results) = std::sync::mpsc::channel();
+    let (tx_results, rx_results) = tokio::sync::mpsc::channel(100);
     let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
     let client = tokio::spawn(networking::run_client(rx_county, tx_results));
 
@@ -62,7 +62,7 @@ fn setup_logger() {
 fn run_app_loop(
     rx_user_input: StdReceiver<TickedUserInput>,
     tx_county: TokioSender<County>,
-    rx_server_results: StdReceiver<(County, WeatherReport)>,
+    mut rx_server_results: TokioReceiver<(County, WeatherReport)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
     let mut terminal = create_terminal()?;
