@@ -8,6 +8,7 @@ use tokio::{
         oneshot,
     },
 };
+use tracing::info;
 
 use weather_dashboard::{county::County, weather_report::WeatherReport};
 
@@ -46,7 +47,8 @@ async fn create_client_task(
             response = response_receivers.next() => {
                 match response {
                     Some(Ok(Some(Ok(response)))) => tx_results.send(response).unwrap(),
-                    _ => panic!("Got bad response"),
+                    None => info!("Got None response"),
+                    _ => info!("Got bad response: {:?}", response),
                 }
             },
         }
