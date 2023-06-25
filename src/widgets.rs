@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use ratatui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
-    text::{Span, Line},
+    text::{Line, Span},
     widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table},
 };
 
@@ -45,7 +45,7 @@ pub fn create_county_list_widget<'a>(all_counties: &[County]) -> List<'a> {
 pub fn create_county_table_widget<'a>(
     county: &County,
     weather_type: WeatherType,
-    county_weather: &HashMap<County, WeatherReport>
+    county_weather: &HashMap<County, WeatherReport>,
 ) -> Table<'a> {
     let weather_type_string: &str = weather_type.into();
     Table::new(vec![Row::new(vec![Cell::from(Span::raw(format!(

@@ -9,16 +9,19 @@ use crate::{app_state::County, weather_report::WeatherReport};
 
 type WeatherCommand = Command<County, (County, WeatherReport)>;
 
-pub async fn run_client() {
+pub async fn run_client(tx_results: std::sync::mpsc::Sender<(County, WeatherReport)>) {
     let (tx, rx) = mpsc::channel::<WeatherCommand>(32);
     let stream = TcpStream::connect("127.0.0.1:6379").await.unwrap();
     let manager = tokio::spawn(tasks::create_cyclic_connection_manager(stream, rx));
-    let client = tokio::spawn(create_client_task(tx));
+    let client = tokio::spawn(create_client_task(tx, tx_results));
     client.await.unwrap();
     manager.await.unwrap();
 }
 
-async fn create_client_task(tx: mpsc::Sender<WeatherCommand>) {
+async fn create_client_task(
+    tx: mpsc::Sender<WeatherCommand>,
+    tx_results: std::sync::mpsc::Sender<(County, WeatherReport)>,
+) {
     for i in 0..10 {
         let (response_tx, response_rx) = oneshot::channel();
         tx.send(WeatherCommand {
@@ -44,13 +47,11 @@ enum ClientAction {
     Stop,
 }
 
-fn process_response_from_server(response: &Result<(County, WeatherReport), ServerError>) -> ClientAction {
+fn process_response_from_server(
+    response: &Result<(County, WeatherReport), ServerError>,
+) -> ClientAction {
     match response {
-        Ok(_response) => {
-            ClientAction::Continue
-        }
-        Err(_error_message) => {
-            ClientAction::Stop
-        }
+        Ok(_response) => ClientAction::Continue,
+        Err(_error_message) => ClientAction::Stop,
     }
 }

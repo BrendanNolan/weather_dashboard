@@ -10,6 +10,14 @@ use crossterm::{
     terminal,
 };
 use networking::run_client;
+use ratatui::{
+    backend::CrosstermBackend,
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Style},
+    text::{Line, Span},
+    widgets::{Block, Borders, ListState, Tabs},
+    Terminal,
+};
 use std::{
     collections::HashMap,
     io::{self, Stdout},
@@ -17,27 +25,19 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use ratatui::{
-    backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
-    text::{Span, Line},
-    widgets::{Block, Borders, ListState, Tabs},
-    Terminal,
-};
 use tui_utils::{get_next_index, get_previous_index};
 use weather_report::WeatherReport;
 use widgets::{create_county_list_widget, create_county_table_widget};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal::enable_raw_mode()?;
-    thread::spawn(|| tokio::spawn(run_client()));
+
+    let (tx_results, rx_results) = std::sync::mpsc::channel(); // TODO: Attach tx to weather
+    thread::spawn(|| tokio::spawn(run_client(tx_results)));
 
     let (tx_user_input, rx_user_input) = mpsc::channel();
 
     thread::spawn(move || run_user_event_loop(Duration::from_millis(200), tx_user_input));
-    let (tx_results, rx_results) = std::sync::mpsc::channel();  // TODO: Attach tx to weather
-                                                                // client.
     run_drawing_loop(rx_user_input, rx_results)?;
 
     Ok(())
