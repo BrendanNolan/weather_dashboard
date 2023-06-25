@@ -34,14 +34,8 @@ use widgets::{create_county_list_widget, create_county_table_widget};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let file_appender = tracing_appender::rolling::hourly(".", "log.txt");
-    let subscriber = tracing_subscriber::fmt::fmt()
-        .with_writer(file_appender)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
-
-    info!("Hello, logs!");
-    info!("Hello again, logs!");
+    setup_logger();
+    info!("Initialised logger");
 
     terminal::enable_raw_mode()?;
 
@@ -55,6 +49,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     run_app_loop(rx_user_input, tx_county, rx_results)?;
 
     Ok(())
+}
+
+fn setup_logger() {
+    let file_appender = tracing_appender::rolling::hourly(".", "log.txt");
+    let subscriber = tracing_subscriber::fmt::fmt()
+        .with_writer(file_appender)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
 }
 
 fn run_app_loop(
