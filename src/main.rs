@@ -35,7 +35,6 @@ use widgets::{create_county_list_widget, create_county_table_widget};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup_logger();
-    info!("Initialised logger");
 
     terminal::enable_raw_mode()?;
 
@@ -83,7 +82,10 @@ fn run_app_loop(
         if let Some(county) = app_state.get_selected_county() {
             let tx_county_clone = tx_county.clone();
             tokio::spawn(async move {
-                let _ = tx_county_clone.send(county).await;
+                match tx_county_clone.send(county).await {
+                    Ok(()) => info!("Successfully Sent County"),
+                    Err(error) => info!("Failed To Send Conunty: {error}"),
+                }
             });
         }
 
