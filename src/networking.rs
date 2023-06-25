@@ -1,5 +1,6 @@
 use client::{command::Command, tasks};
 use connection_utils::ServerError;
+use futures::stream::{FuturesUnordered, StreamExt};
 use std::sync::mpsc::{Receiver as StdReceiver, Sender as StdSender};
 use tokio::{
     net::TcpStream,
@@ -30,28 +31,21 @@ async fn create_client_task(
     tx: TokioSender<WeatherCommand>,
     tx_results: StdSender<(County, WeatherReport)>,
 ) {
-    let mut response_rx = None;
+    let mut response_receivers = FuturesUnordered::new();
     loop {
         tokio::select! {
             Some(county) = try_recv(&rx_county) => {
                 let (response_tx, rx) = oneshot::channel();
-                response_rx = Some(rx);
                 tx.send(WeatherCommand {
                     data: county,
                     responder: response_tx,
                 })
                 .await
                 .unwrap();
+                response_receivers.push(rx);
             },
-            response = response_rx => {
-                match response {
-                    Ok(Some(response)) => match process_response_from_server(&response) {
-                        ClientAction::Continue => {}
-                        ClientAction::Stop => return,
-                    },
-                    Ok(None) => println!("Failed to read response."),
-                    Err(_) => panic!("Client unexpectedly failed to receive a response"),
-                }
+            Some(Ok(Some(Ok(response)))) = response_receivers.next() => {
+                tx_results.send(response);
             },
         }
     }
