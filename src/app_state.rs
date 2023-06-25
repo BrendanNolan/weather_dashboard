@@ -53,6 +53,14 @@ pub fn get_weather_type_strings() -> Vec<&'static str> {
 pub struct AppState {
     pub active_weather_type: WeatherType,
     pub counties_list: ListState,
+    pub counties: Vec<County>,
+}
+
+impl AppState {
+    pub fn get_selected_county(&self) -> Option<County> {
+        let county_index = self.counties_list.selected()?;
+        Some(self.counties[county_index].clone())
+    }
 }
 
 impl Default for AppState {
@@ -62,9 +70,10 @@ impl Default for AppState {
         Self {
             active_weather_type: WeatherType::Rain,
             counties_list: weather_list,
+            counties: vec![County("Wexford".to_string()), County("Cork".to_string())],
         }
     }
 }
 
-#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Hash)]
+#[derive(Eq, PartialEq, Clone, Serialize, Deserialize, Debug, Hash)]
 pub struct County(pub String);

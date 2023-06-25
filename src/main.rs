@@ -9,7 +9,6 @@ use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,
 };
-use networking::run_client;
 use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -25,26 +24,30 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+use tokio::sync::mpsc::Sender as TokioSender;
 use tui_utils::{get_next_index, get_previous_index};
 use weather_report::WeatherReport;
 use widgets::{create_county_list_widget, create_county_table_widget};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal::enable_raw_mode()?;
 
     let (tx_results, rx_results) = std::sync::mpsc::channel();
-    thread::spawn(|| tokio::spawn(run_client(tx_results)));
+    let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
+    thread::spawn(|| tokio::spawn(networking::run_client(rx_county, tx_results)));
 
     let (tx_user_input, rx_user_input) = mpsc::channel();
 
     thread::spawn(move || run_user_event_loop(Duration::from_millis(200), tx_user_input));
-    run_drawing_loop(rx_user_input, rx_results)?;
+    run_app_loop(rx_user_input, tx_county, rx_results)?;
 
     Ok(())
 }
 
-fn run_drawing_loop(
+fn run_app_loop(
     rx_user_input: StdReceiver<TickedUserInput>,
+    tx_county: TokioSender<County>,
     rx_server_results: StdReceiver<(County, WeatherReport)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
@@ -58,9 +61,17 @@ fn run_drawing_loop(
                 rect,
                 app_state.active_weather_type,
                 &mut app_state.counties_list,
+                &app_state.counties,
                 &county_weather,
             );
         })?;
+
+        if let Some(county) = app_state.get_selected_county() {
+            let tx_county_clone = tx_county.clone();
+            tokio::spawn(async move {
+                tx_county_clone.send(county).await.unwrap();
+            });
+        }
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
         if let Ok((county, report)) = rx_server_results.try_recv() {
@@ -147,7 +158,8 @@ fn run_user_event_loop(tick_rate: Duration, tx: StdSender<TickedUserInput>) {
 fn draw(
     total_drawing_rect: &mut ratatui::Frame<CrosstermBackend<io::Stdout>>,
     weather_type: WeatherType,
-    counties: &mut ListState,
+    counties_list: &mut ListState,
+    counties: &[County],
     county_weather: &HashMap<County, WeatherReport>,
 ) {
     let app_rects = create_app_rects(total_drawing_rect.size());
@@ -157,8 +169,8 @@ fn draw(
         weather_type,
         total_drawing_rect,
         &app_rects,
+        counties_list,
         counties,
-        &[County("Wexford".to_string()), County("Cork".to_string())],
         county_weather,
     );
 }

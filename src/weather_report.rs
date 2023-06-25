@@ -18,3 +18,13 @@ impl WeatherReport {
         }
     }
 }
+
+impl Default for WeatherReport {
+    fn default() -> Self {
+        WeatherReport {
+            sunshine: 0.0,
+            wind_speed: 0.0,
+            rainfall: 0.0,
+        }
+    }
+}

@@ -52,7 +52,10 @@ pub fn create_county_table_widget<'a>(
         "{} forecast for {}  is {}",
         weather_type_string,
         county.0,
-        county_weather.get(county).unwrap().get(weather_type)
+        county_weather
+            .get(county)
+            .unwrap_or(&WeatherReport::default())
+            .get(weather_type)
     )))])])
     .header(Row::new(vec![Cell::from(Span::styled(
         weather_type_string,
