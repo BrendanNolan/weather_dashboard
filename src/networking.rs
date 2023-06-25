@@ -43,8 +43,11 @@ async fn create_client_task(
                 .unwrap();
                 response_receivers.push(rx);
             },
-            Some(Ok(Some(Ok(response)))) = response_receivers.next() => {
-                tx_results.send(response).unwrap();
+            response = response_receivers.next() => {
+                match response {
+                    Some(Ok(Some(Ok(response)))) => tx_results.send(response).unwrap(),
+                    _ => panic!("Got bad response"),
+                }
             },
         }
     }
