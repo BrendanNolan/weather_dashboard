@@ -11,14 +11,17 @@ impl CountyWeatherProvider {
     }
 }
 
-impl RequestProcessor<County, WeatherReport> for CountyWeatherProvider {
-    fn process(&self, _request: &County) -> WeatherReport {
+impl RequestProcessor<County, (County, WeatherReport)> for CountyWeatherProvider {
+    fn process(&self, requested_county: &County) -> (County, WeatherReport) {
         let mut random_number_generator = rand::thread_rng();
-        WeatherReport {
-            sunshine: random_number_generator.gen::<f32>(),
-            wind_speed: random_number_generator.gen::<f32>(),
-            rainfall: random_number_generator.gen::<f32>(),
-        }
+        (
+            requested_county.clone(),
+            WeatherReport {
+                sunshine: random_number_generator.gen::<f32>(),
+                wind_speed: random_number_generator.gen::<f32>(),
+                rainfall: random_number_generator.gen::<f32>(),
+            },
+        )
     }
 }
 
