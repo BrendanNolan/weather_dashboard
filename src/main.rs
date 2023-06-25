@@ -24,6 +24,7 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::mpsc::Sender as TokioSender;
+use tracing::info;
 use tui_utils::{get_next_index, get_previous_index};
 use weather_dashboard::{
     county::County,
@@ -33,6 +34,15 @@ use widgets::{create_county_list_widget, create_county_table_widget};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let file_appender = tracing_appender::rolling::hourly(".", "log.txt");
+    let subscriber = tracing_subscriber::fmt::fmt()
+        .with_writer(file_appender)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
+
+    info!("Hello, logs!");
+    info!("Hello again, logs!");
+
     terminal::enable_raw_mode()?;
 
     let (tx_results, rx_results) = std::sync::mpsc::channel();
@@ -71,7 +81,7 @@ fn run_app_loop(
         if let Some(county) = app_state.get_selected_county() {
             let tx_county_clone = tx_county.clone();
             tokio::spawn(async move {
-                tx_county_clone.send(county).await.unwrap();
+                let _ = tx_county_clone.send(county).await;
             });
         }
 
