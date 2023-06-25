@@ -21,7 +21,7 @@ use ratatui::{
 use std::{
     collections::HashMap,
     io::{self, Stdout},
-    sync::mpsc::{self, Receiver},
+    sync::mpsc::{self, Receiver as StdReceiver, Sender as StdSender},
     thread,
     time::{Duration, Instant},
 };
@@ -32,7 +32,7 @@ use widgets::{create_county_list_widget, create_county_table_widget};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal::enable_raw_mode()?;
 
-    let (tx_results, rx_results) = std::sync::mpsc::channel(); // TODO: Attach tx to weather
+    let (tx_results, rx_results) = std::sync::mpsc::channel();
     thread::spawn(|| tokio::spawn(run_client(tx_results)));
 
     let (tx_user_input, rx_user_input) = mpsc::channel();
@@ -44,8 +44,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn run_drawing_loop(
-    rx_user_input: Receiver<TickedUserInput>,
-    rx_server_results: std::sync::mpsc::Receiver<(County, WeatherReport)>,
+    rx_user_input: StdReceiver<TickedUserInput>,
+    rx_server_results: StdReceiver<(County, WeatherReport)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
     let mut terminal = create_terminal()?;
@@ -124,7 +124,7 @@ fn create_terminal() -> Result<Terminal<CrosstermBackend<io::Stdout>>, Box<dyn s
     Ok(terminal)
 }
 
-fn run_user_event_loop(tick_rate: Duration, tx: mpsc::Sender<TickedUserInput>) {
+fn run_user_event_loop(tick_rate: Duration, tx: StdSender<TickedUserInput>) {
     let mut last_tick = Instant::now();
     loop {
         let timeout = tick_rate
