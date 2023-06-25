@@ -1,4 +1,4 @@
-use crate::{county::County, weather_report::WeatherReport};
+use weather_dashboard::{county::County, weather_report::WeatherReport};
 use server::{request_processing::RequestProcessor, server_runner, shutdown::ShutdownListener};
 use tokio::{signal, sync::watch};
 

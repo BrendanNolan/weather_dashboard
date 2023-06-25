@@ -1,5 +1,5 @@
 [package]
-name = "rust-commandline-example"
+name = "weather_dashboard"
 version = "0.1.0"
 authors = ["Brendan Nolan <bnolan23@gmail.com>"]
 edition = "2018"

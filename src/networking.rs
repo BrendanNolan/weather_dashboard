@@ -9,7 +9,7 @@ use tokio::{
     },
 };
 
-use crate::{weather_report::WeatherReport, county::County};
+use weather_dashboard::{weather_report::WeatherReport, county::County};
 
 type WeatherCommand = Command<County, (County, WeatherReport)>;
 

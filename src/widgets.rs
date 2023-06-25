@@ -7,10 +7,7 @@ use ratatui::{
     widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table},
 };
 
-use crate::{
-    app_state::{County, WeatherType},
-    weather_report::WeatherReport,
-};
+use weather_dashboard::{county::County, weather_report::{WeatherReport, WeatherType}};
 
 fn create_block(title: &str) -> Block {
     Block::default()

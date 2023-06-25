@@ -7,6 +7,37 @@ pub enum WeatherType {
     Sun,
 }
 
+impl From<WeatherType> for usize {
+    fn from(weather_type: WeatherType) -> Self {
+        match weather_type {
+            WeatherType::Wind => 0,
+            WeatherType::Rain => 1,
+            WeatherType::Sun => 2,
+        }
+    }
+}
+
+impl From<usize> for WeatherType {
+    fn from(number: usize) -> Self {
+        match number {
+            0 => WeatherType::Wind,
+            1 => WeatherType::Rain,
+            2 => WeatherType::Sun,
+            _ => panic!("Cannot Create Weathertype From Integer"),
+        }
+    }
+}
+
+impl From<WeatherType> for &'static str {
+    fn from(weather_type: WeatherType) -> Self {
+        match weather_type {
+            WeatherType::Wind => "Wind",
+            WeatherType::Rain => "Rain",
+            WeatherType::Sun => "Sun",
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherReport {
     sunshine: f32,

@@ -609,23 +609,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-commandline-example"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "client",
- "connection_utils",
- "crossterm 0.19.0",
- "futures",
- "rand",
- "ratatui",
- "serde",
- "serde_json",
- "server",
- "tokio",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -914,6 +897,23 @@ name = "wasm-bindgen-shared"
 version = "0.2.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a901d592cafaa4d711bc324edfaff879ac700b19c3dfd60058d2b445be2691eb"
+
+[[package]]
+name = "weather_dashboard"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "client",
+ "connection_utils",
+ "crossterm 0.19.0",
+ "futures",
+ "rand",
+ "ratatui",
+ "serde",
+ "serde_json",
+ "server",
+ "tokio",
+]
 
 [[package]]
 name = "winapi"

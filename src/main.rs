@@ -1,13 +1,10 @@
 mod app_state;
-pub mod county;
 mod networking;
 mod tui_utils;
-pub mod weather_report;
 mod widgets;
 
 use app_state::AppState;
-use county::County;
-use weather_report::WeatherType;
+use weather_dashboard::{county::County, weather_report::{WeatherType, WeatherReport}};
 use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,
@@ -29,7 +26,6 @@ use std::{
 };
 use tokio::sync::mpsc::Sender as TokioSender;
 use tui_utils::{get_next_index, get_previous_index};
-use weather_report::WeatherReport;
 use widgets::{create_county_list_widget, create_county_table_widget};
 
 #[tokio::main]
