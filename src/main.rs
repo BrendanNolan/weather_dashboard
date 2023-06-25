@@ -1,9 +1,10 @@
 mod app_state;
-mod common;
+mod networking;
+mod tui_utils;
 mod widgets;
+mod weather_report;
 
 use app_state::{AppState, County, WeatherType};
-use common::{get_next_index, get_previous_index};
 use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,
@@ -22,6 +23,7 @@ use tui::{
     widgets::{Block, Borders, ListState, Tabs},
     Terminal,
 };
+use tui_utils::{get_next_index, get_previous_index};
 use widgets::{create_county_list_widget, create_county_table_widget};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
