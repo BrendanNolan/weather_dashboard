@@ -7,9 +7,9 @@ use tokio::{
 
 use crate::{app_state::County, weather_report::WeatherReport};
 
-type WeatherCommand = Command<County, WeatherReport>;
+type WeatherCommand = Command<County, (County, WeatherReport)>;
 
-async fn run_client() {
+pub async fn run_client() {
     let (tx, rx) = mpsc::channel::<WeatherCommand>(32);
     let stream = TcpStream::connect("127.0.0.1:6379").await.unwrap();
     let manager = tokio::spawn(tasks::create_cyclic_connection_manager(stream, rx));
@@ -44,22 +44,12 @@ enum ClientAction {
     Stop,
 }
 
-fn process_response_from_server(
-    response: &Result<String, ServerError>,
-) -> ClientAction {
+fn process_response_from_server(response: &Result<(County, WeatherReport), ServerError>) -> ClientAction {
     match response {
-        Ok(response) => {
-            println!(
-                "Received a response: {:?}.",
-                response,
-            );
+        Ok(_response) => {
             ClientAction::Continue
         }
-        Err(error_message) => {
-            println!(
-                "Received a server error: {:?}.",
-                error_message,
-            );
+        Err(_error_message) => {
             ClientAction::Stop
         }
     }

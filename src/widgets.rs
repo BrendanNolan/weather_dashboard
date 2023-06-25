@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use tui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
@@ -5,7 +7,10 @@ use tui::{
     widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table},
 };
 
-use crate::app_state::{County, WeatherType};
+use crate::{
+    app_state::{County, WeatherType},
+    weather_report::WeatherReport,
+};
 
 fn create_block(title: &str) -> Block {
     Block::default()
@@ -37,14 +42,20 @@ pub fn create_county_list_widget<'a>(all_counties: &[County]) -> List<'a> {
         .highlight_style(create_highlight_style())
 }
 
-pub fn create_county_table_widget<'a>(county: &County, weather_type: WeatherType) -> Table<'a> {
-    let weather_type: &str = weather_type.into();
+pub fn create_county_table_widget<'a>(
+    county: &County,
+    weather_type: WeatherType,
+    county_weather: &HashMap<County, WeatherReport>
+) -> Table<'a> {
+    let weather_type_string: &str = weather_type.into();
     Table::new(vec![Row::new(vec![Cell::from(Span::raw(format!(
-        "{} data from server for {} would go here",
-        weather_type, county.0
+        "{} forecast for {}  is {}",
+        weather_type_string,
+        county.0,
+        county_weather.get(county).unwrap().get(weather_type)
     )))])])
     .header(Row::new(vec![Cell::from(Span::styled(
-        weather_type,
+        weather_type_string,
         Style::default().add_modifier(Modifier::BOLD),
     ))]))
     .block(create_block("Forecast"))

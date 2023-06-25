@@ -1,15 +1,17 @@
 mod app_state;
 mod networking;
 mod tui_utils;
-mod widgets;
 mod weather_report;
+mod widgets;
 
 use app_state::{AppState, County, WeatherType};
 use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,
 };
+use networking::run_client;
 use std::{
+    collections::HashMap,
     io::{self, Stdout},
     sync::mpsc::{self, Receiver},
     thread,
@@ -24,25 +26,31 @@ use tui::{
     Terminal,
 };
 use tui_utils::{get_next_index, get_previous_index};
+use weather_report::WeatherReport;
 use widgets::{create_county_list_widget, create_county_table_widget};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal::enable_raw_mode()?;
+    thread::spawn(|| tokio::spawn(run_client()));
 
     let (tx_user_input, rx_user_input) = mpsc::channel();
 
     thread::spawn(move || run_user_event_loop(Duration::from_millis(200), tx_user_input));
-    run_drawing_loop(rx_user_input)?;
+    let (tx_results, rx_results) = std::sync::mpsc::channel();  // TODO: Attach tx to weather
+                                                                // client.
+    run_drawing_loop(rx_user_input, rx_results)?;
 
     Ok(())
 }
 
 fn run_drawing_loop(
     rx_user_input: Receiver<TickedUserInput>,
+    rx_server_results: std::sync::mpsc::Receiver<(County, WeatherReport)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
     let mut terminal = create_terminal()?;
     let mut response_to_input = ResponseToUserInput::Continue;
+    let mut county_weather = HashMap::<County, WeatherReport>::new();
 
     while response_to_input == ResponseToUserInput::Continue {
         terminal.draw(|rect| {
@@ -50,10 +58,14 @@ fn run_drawing_loop(
                 rect,
                 app_state.active_weather_type,
                 &mut app_state.counties_list,
+                &county_weather,
             );
         })?;
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
+        if let Ok((county, report)) = rx_server_results.try_recv() {
+            county_weather.insert(county, report);
+        };
     }
 
     prepare_terminal_for_app_exit(&mut terminal)?;
@@ -136,6 +148,7 @@ fn draw(
     total_drawing_rect: &mut tui::Frame<CrosstermBackend<io::Stdout>>,
     weather_type: WeatherType,
     counties: &mut ListState,
+    county_weather: &HashMap<County, WeatherReport>,
 ) {
     let app_rects = create_app_rects(total_drawing_rect.size());
     let tabs = create_weather_type_tabs(create_menu()).select(weather_type.into());
@@ -146,6 +159,7 @@ fn draw(
         &app_rects,
         counties,
         &[County("Wexford".to_string()), County("Cork".to_string())],
+        county_weather,
     );
 }
 
@@ -163,11 +177,16 @@ fn draw_weather(
     app_rects: &AppRects,
     county_list_state: &mut ListState,
     all_counties: &[County],
+    county_weather: &HashMap<County, WeatherReport>,
 ) -> Option<()> {
     let weather_rects = create_weather_rects(&app_rects.weather_display);
     let list = create_county_list_widget(all_counties);
     let county_index = county_list_state.selected()?;
-    let table = create_county_table_widget(all_counties.get(county_index)?, weather_type);
+    let table = create_county_table_widget(
+        all_counties.get(county_index)?,
+        weather_type,
+        county_weather,
+    );
     rect.render_stateful_widget(list, weather_rects.names, county_list_state);
     rect.render_widget(table, weather_rects.details);
     Some(())

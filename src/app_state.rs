@@ -66,5 +66,5 @@ impl Default for AppState {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Hash)]
 pub struct County(pub String);
