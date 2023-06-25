@@ -1,5 +1,5 @@
-use weather_dashboard::county::County;
 use ratatui::widgets::ListState;
+use weather_dashboard::county::County;
 use weather_dashboard::weather_report::WeatherType;
 
 pub fn get_weather_type_strings() -> Vec<&'static str> {

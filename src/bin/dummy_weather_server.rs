@@ -1,11 +1,7 @@
-use weather_dashboard::{county::County, weather_report::WeatherReport};
+use rand::Rng;
 use server::{request_processing::RequestProcessor, server_runner, shutdown::ShutdownListener};
 use tokio::{signal, sync::watch};
-
-fn put_int_in_string(i: &u32) -> String {
-    std::thread::sleep(std::time::Duration::from_secs(1));
-    format!("The number is: {}", i)
-}
+use weather_dashboard::{county::County, weather_report::WeatherReport};
 
 struct CountyWeatherProvider {}
 
@@ -15,9 +11,14 @@ impl CountyWeatherProvider {
     }
 }
 
-impl RequestProcessor<County, String> for CountyWeatherProvider {
-    fn process(&self, request: &u32) -> String {
-        put_int_in_string(request)
+impl RequestProcessor<County, WeatherReport> for CountyWeatherProvider {
+    fn process(&self, _request: &County) -> WeatherReport {
+        let mut random_number_generator = rand::thread_rng();
+        WeatherReport {
+            sunshine: random_number_generator.gen::<f32>(),
+            wind_speed: random_number_generator.gen::<f32>(),
+            rainfall: random_number_generator.gen::<f32>(),
+        }
     }
 }
 
@@ -40,4 +41,3 @@ async fn handle_shutdown(tx_shutdown: watch::Sender<()>) {
     println!("Server shutting down ...");
     let _ = tx_shutdown.send(());
 }
-

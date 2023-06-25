@@ -40,9 +40,9 @@ impl From<WeatherType> for &'static str {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherReport {
-    sunshine: f32,
-    wind_speed: f32,
-    rainfall: f32,
+    pub sunshine: f32,
+    pub wind_speed: f32,
+    pub rainfall: f32,
 }
 
 impl WeatherReport {
