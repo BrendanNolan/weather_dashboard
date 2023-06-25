@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use tui::{
+use ratatui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
     text::{Span, Spans},

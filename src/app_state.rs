@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tui::widgets::ListState;
+use ratatui::widgets::ListState;
 
 #[derive(Copy, Clone, Debug)]
 pub enum WeatherType {

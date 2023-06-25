@@ -1,4 +1,4 @@
-use tui::widgets::ListState;
+use ratatui::widgets::ListState;
 
 pub fn get_next_index(list_state: &ListState) -> Option<usize> {
     let next_index = list_state.selected().map_or(0, |i| i + 1);

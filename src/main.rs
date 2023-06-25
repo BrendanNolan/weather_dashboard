@@ -17,7 +17,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tui::{
+use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
@@ -145,7 +145,7 @@ fn run_user_event_loop(tick_rate: Duration, tx: mpsc::Sender<TickedUserInput>) {
 }
 
 fn draw(
-    total_drawing_rect: &mut tui::Frame<CrosstermBackend<io::Stdout>>,
+    total_drawing_rect: &mut ratatui::Frame<CrosstermBackend<io::Stdout>>,
     weather_type: WeatherType,
     counties: &mut ListState,
     county_weather: &HashMap<County, WeatherReport>,
@@ -173,7 +173,7 @@ fn create_menu<'a>() -> Vec<Spans<'a>> {
 
 fn draw_weather(
     weather_type: WeatherType,
-    rect: &mut tui::Frame<CrosstermBackend<io::Stdout>>,
+    rect: &mut ratatui::Frame<CrosstermBackend<io::Stdout>>,
     app_rects: &AppRects,
     county_list_state: &mut ListState,
     all_counties: &[County],
