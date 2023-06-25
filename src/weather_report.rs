@@ -1,6 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::app_state::WeatherType;
+#[derive(Copy, Clone, Debug)]
+pub enum WeatherType {
+    Wind,
+    Rain,
+    Sun,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WeatherReport {

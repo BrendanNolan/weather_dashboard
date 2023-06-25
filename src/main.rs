@@ -1,10 +1,13 @@
 mod app_state;
+pub mod county;
 mod networking;
 mod tui_utils;
-mod weather_report;
+pub mod weather_report;
 mod widgets;
 
-use app_state::{AppState, County, WeatherType};
+use app_state::AppState;
+use county::County;
+use weather_report::WeatherType;
 use crossterm::{
     event::{self, Event as CEvent, KeyCode, KeyEvent},
     terminal,

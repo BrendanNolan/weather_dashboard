@@ -1,12 +1,6 @@
+use crate::county::County;
 use ratatui::widgets::ListState;
-use serde::{Deserialize, Serialize};
-
-#[derive(Copy, Clone, Debug)]
-pub enum WeatherType {
-    Wind,
-    Rain,
-    Sun,
-}
+use crate::weather_report::WeatherType;
 
 impl From<WeatherType> for usize {
     fn from(weather_type: WeatherType) -> Self {
@@ -74,6 +68,3 @@ impl Default for AppState {
         }
     }
 }
-
-#[derive(Eq, PartialEq, Clone, Serialize, Deserialize, Debug, Hash)]
-pub struct County(pub String);
