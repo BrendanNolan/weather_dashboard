@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use tui::widgets::ListState;
 
 #[derive(Copy, Clone, Debug)]
@@ -65,4 +66,5 @@ impl Default for AppState {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct County(pub String);

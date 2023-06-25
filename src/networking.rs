@@ -19,18 +19,17 @@ async fn run_client() {
 }
 
 async fn create_client_task(tx: mpsc::Sender<WeatherCommand>) {
-    let begin_time = SystemTime::now();
     for i in 0..10 {
         let (response_tx, response_rx) = oneshot::channel();
         tx.send(WeatherCommand {
-            data: i,
+            data: County(format!("County_{i}")),
             responder: response_tx,
         })
         .await
         .unwrap();
         let response = response_rx.await;
         match response {
-            Ok(Some(response)) => match process_response_from_server(&response, &begin_time) {
+            Ok(Some(response)) => match process_response_from_server(&response) {
                 ClientAction::Continue => {}
                 ClientAction::Stop => return,
             },
@@ -47,22 +46,19 @@ enum ClientAction {
 
 fn process_response_from_server(
     response: &Result<String, ServerError>,
-    begin_time: &SystemTime,
 ) -> ClientAction {
     match response {
         Ok(response) => {
             println!(
-                "Received a response: {:?} after {} seconds.",
+                "Received a response: {:?}.",
                 response,
-                begin_time.elapsed().unwrap().as_secs()
             );
             ClientAction::Continue
         }
         Err(error_message) => {
             println!(
-                "Received a server error: {:?} after {} seconds.",
+                "Received a server error: {:?}.",
                 error_message,
-                begin_time.elapsed().unwrap().as_secs()
             );
             ClientAction::Stop
         }
