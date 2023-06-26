@@ -79,14 +79,9 @@ fn run_app_loop(
             );
         })?;
 
-        if let Some(county) = app_state.get_selected_county() {
-            let tx_county_clone = tx_county.clone();
-            tokio::spawn(async move {
-                match tx_county_clone.send(county).await {
-                    Ok(()) => info!("Successfully Sent County"),
-                    Err(error) => info!("Failed To Send Conunty: {error}"),
-                }
-            });
+        if app_state.weather_requested {
+            send_weather_request(&app_state, &tx_county);
+            info!("Sending weather request.");
         }
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
@@ -97,6 +92,19 @@ fn run_app_loop(
 
     prepare_terminal_for_app_exit(&mut terminal)?;
     Ok(())
+}
+
+fn send_weather_request(app_state: &AppState, tx_county: &TokioSender<County>) {
+    let Some(county) = app_state.get_selected_county() else {
+         return;
+     };
+    let tx_county_clone = tx_county.clone();
+    tokio::spawn(async move {
+        match tx_county_clone.send(county).await {
+            Ok(()) => info!("Successfully Sent County"),
+            Err(error) => info!("Failed To Send Conunty: {error}"),
+        }
+    });
 }
 
 enum TickedUserInput {
@@ -115,6 +123,7 @@ fn handle_user_input(
     app_state: &mut AppState,
 ) -> Result<ResponseToUserInput, Box<dyn std::error::Error>> {
     let TickedUserInput::Input(event) = user_input else {
+        app_state.weather_requested = false;
         return Ok(ResponseToUserInput::Continue);
     };
     if event.code == KeyCode::Char('q') {
@@ -126,7 +135,11 @@ fn handle_user_input(
         KeyCode::Char('s') => app_state.active_weather_type = WeatherType::Sun,
         KeyCode::Char('k') => app_state.select_previous_index(),
         KeyCode::Char('j') => app_state.select_next_index(),
+        KeyCode::Char('g') => app_state.weather_requested = true,
         _ => {}
+    }
+    if event.code != KeyCode::Char('g') {
+        app_state.weather_requested = false;
     }
     Ok(ResponseToUserInput::Continue)
 }

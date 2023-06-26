@@ -17,6 +17,7 @@ pub struct AppState {
     pub active_weather_type: WeatherType,
     pub counties_list: ListState,
     pub counties: Vec<County>,
+    pub weather_requested: bool,
 }
 
 impl AppState {
@@ -52,6 +53,7 @@ impl Default for AppState {
             active_weather_type: WeatherType::Rain,
             counties_list: weather_list,
             counties: vec![County("Wexford".to_string()), County("Cork".to_string())],
+            weather_requested: false,
         }
     }
 }
