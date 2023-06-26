@@ -20,6 +20,24 @@ pub struct AppState {
 }
 
 impl AppState {
+    pub fn select_next_index(&mut self) {
+        let next_index = self.counties_list.selected().map_or(0, |i| i + 1);
+        if next_index < self.counties.len() {
+            self.counties_list.select(Some(next_index));
+        }
+    }
+
+    pub fn select_previous_index(&mut self) {
+        if self.counties.is_empty() {
+            return;
+        }
+        let previous_index = self
+            .counties_list
+            .selected()
+            .map_or(0, |i| i.saturating_sub(1));
+        self.counties_list.select(Some(previous_index));
+    }
+
     pub fn get_selected_county(&self) -> Option<County> {
         let county_index = self.counties_list.selected()?;
         Some(self.counties[county_index].clone())

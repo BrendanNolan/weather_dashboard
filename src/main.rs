@@ -1,6 +1,5 @@
 mod app_state;
 mod networking;
-mod tui_utils;
 mod widgets;
 
 use app_state::AppState;
@@ -26,7 +25,6 @@ use std::{
 };
 use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
 use tracing::info;
-use tui_utils::{get_next_index, get_previous_index};
 use weather_dashboard::{
     county::County,
     weather_report::{WeatherReport, WeatherType},
@@ -126,12 +124,8 @@ fn handle_user_input(
         KeyCode::Char('w') => app_state.active_weather_type = WeatherType::Wind,
         KeyCode::Char('r') => app_state.active_weather_type = WeatherType::Rain,
         KeyCode::Char('s') => app_state.active_weather_type = WeatherType::Sun,
-        KeyCode::Char('k') => app_state
-            .counties_list
-            .select(get_previous_index(&app_state.counties_list)),
-        KeyCode::Char('j') => app_state
-            .counties_list
-            .select(get_next_index(&app_state.counties_list)),
+        KeyCode::Char('k') => app_state.select_previous_index(),
+        KeyCode::Char('j') => app_state.select_next_index(),
         _ => {}
     }
     Ok(ResponseToUserInput::Continue)
