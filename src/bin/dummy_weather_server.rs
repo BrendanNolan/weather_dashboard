@@ -13,6 +13,7 @@ impl CountyWeatherProvider {
 
 impl RequestProcessor<County, (County, WeatherReport)> for CountyWeatherProvider {
     fn process(&self, requested_county: &County) -> (County, WeatherReport) {
+        std::thread::sleep(std::time::Duration::from_secs(5));
         let mut random_number_generator = rand::thread_rng();
         (
             requested_county.clone(),
