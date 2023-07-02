@@ -85,19 +85,26 @@ fn run_app_loop(
         }
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
-        match rx_server_results.try_recv() {
-            Ok(Ok((county, report))) => {
-                county_weather.insert(county, report);
-            },
-            Ok(Err(error)) => {
-                info!("Error: {error}");
-            },
-            Err(_) => {},
-        }
+        receive_weather(&mut rx_server_results, &mut county_weather);
     }
 
     prepare_terminal_for_app_exit(&mut terminal)?;
     Ok(())
+}
+
+fn receive_weather(
+    rx_server_results: &mut TokioReceiver<Result<(County, WeatherReport), ServerError>>,
+    county_weather: &mut HashMap<County, WeatherReport>,
+) {
+    let Ok(weather_report) = rx_server_results.try_recv() else { return; };
+    match weather_report {
+        Ok((county, report)) => {
+            county_weather.insert(county, report);
+        }
+        Err(error) => {
+            info!("Error: {error}");
+        }
+    }
 }
 
 fn send_weather_request(app_state: &AppState, tx_county: &TokioSender<County>) {
