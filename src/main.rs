@@ -61,7 +61,7 @@ fn setup_logger() {
 fn run_app_loop(
     rx_user_input: StdReceiver<TickedUserInput>,
     tx_county: TokioSender<County>,
-    mut rx_server_results: TokioReceiver<Option<Result<(County, WeatherReport), ServerError>>>,
+    mut rx_server_results: TokioReceiver<Result<(County, WeatherReport), ServerError>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut app_state = AppState::default();
     let mut terminal = create_terminal()?;
@@ -85,9 +85,15 @@ fn run_app_loop(
         }
 
         response_to_input = handle_user_input(&rx_user_input.recv()?, &mut app_state)?;
-        if let Ok(Some(Ok((county, report)))) = rx_server_results.try_recv() {
-            county_weather.insert(county, report);
-        };
+        match rx_server_results.try_recv() {
+            Ok(Ok((county, report))) => {
+                county_weather.insert(county, report);
+            },
+            Ok(Err(error)) => {
+                info!("Error: {error}");
+            },
+            Err(_) => {},
+        }
     }
 
     prepare_terminal_for_app_exit(&mut terminal)?;
