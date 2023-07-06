@@ -4,7 +4,7 @@ use tokio::{
     sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender},
 };
 
-use weather_dashboard::{county::County, weather_report::WeatherReport};
+use crate::{County, WeatherReport};
 
 pub async fn run_client(
     rx_county: TokioReceiver<County>,
