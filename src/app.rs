@@ -12,18 +12,6 @@ use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
 mod drawing;
 pub mod networking;
 mod terminal_utils;
-mod widgets;
-
-pub fn get_weather_type_strings() -> Vec<&'static str> {
-    vec![0, 1, 2]
-        .into_iter()
-        .map(|i| {
-            let weather_type: WeatherType = i.into();
-            let weather_type: &'static str = weather_type.into();
-            weather_type
-        })
-        .collect()
-}
 
 pub struct AppState {
     pub active_weather_type: WeatherType,

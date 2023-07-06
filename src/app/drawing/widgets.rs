@@ -9,21 +9,6 @@ use ratatui::{
 
 use crate::{County, WeatherReport, WeatherType};
 
-fn create_block(title: &str) -> Block {
-    Block::default()
-        .borders(Borders::ALL)
-        .style(Style::default().fg(Color::White))
-        .title(title)
-        .border_type(BorderType::Plain)
-}
-
-fn create_highlight_style() -> Style {
-    Style::default()
-        .bg(Color::Yellow)
-        .fg(Color::Black)
-        .add_modifier(Modifier::BOLD)
-}
-
 pub fn create_county_list_widget<'a>(all_counties: &[County]) -> List<'a> {
     let county_items: Vec<_> = all_counties
         .iter()
@@ -60,4 +45,19 @@ pub fn create_county_table_widget<'a>(
     ))]))
     .block(create_block("Forecast"))
     .widths(&[Constraint::Percentage(100)])
+}
+
+fn create_block(title: &str) -> Block {
+    Block::default()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(Color::White))
+        .title(title)
+        .border_type(BorderType::Plain)
+}
+
+fn create_highlight_style() -> Style {
+    Style::default()
+        .bg(Color::Yellow)
+        .fg(Color::Black)
+        .add_modifier(Modifier::BOLD)
 }

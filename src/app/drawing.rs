@@ -1,4 +1,3 @@
-use super::widgets::{create_county_list_widget, create_county_table_widget};
 use crate::{County, WeatherReport, WeatherType};
 use ratatui::{
     backend::CrosstermBackend,
@@ -8,6 +7,8 @@ use ratatui::{
     widgets::{Block, Borders, ListState, Tabs},
 };
 use std::collections::HashMap;
+
+mod widgets;
 
 pub fn draw(
     total_drawing_rect: &mut ratatui::Frame<CrosstermBackend<std::io::Stdout>>,
@@ -30,10 +31,21 @@ pub fn draw(
 }
 
 fn create_menu<'a>() -> Vec<Line<'a>> {
-    let menu_items = super::get_weather_type_strings();
+    let menu_items = get_weather_type_strings();
     menu_items
         .iter()
         .map(|t| Line::from(vec![Span::styled(*t, Style::default())]))
+        .collect()
+}
+
+fn get_weather_type_strings() -> Vec<&'static str> {
+    vec![0, 1, 2]
+        .into_iter()
+        .map(|i| {
+            let weather_type: WeatherType = i.into();
+            let weather_type: &'static str = weather_type.into();
+            weather_type
+        })
         .collect()
 }
 
@@ -46,9 +58,9 @@ fn draw_weather(
     county_weather: &HashMap<County, WeatherReport>,
 ) -> Option<()> {
     let weather_rects = create_weather_rects(&app_rects.weather_display);
-    let list = create_county_list_widget(all_counties);
+    let list = widgets::create_county_list_widget(all_counties);
     let county_index = county_list_state.selected()?;
-    let table = create_county_table_widget(
+    let table = widgets::create_county_table_widget(
         all_counties.get(county_index)?,
         weather_type,
         county_weather,
