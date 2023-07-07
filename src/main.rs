@@ -9,7 +9,7 @@ use weather_dashboard::{
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_logger();
+    app::logging::setup_logger();
 
     terminal::enable_raw_mode()?;
 
@@ -24,12 +24,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     client.await.unwrap();
     Ok(())
-}
-
-fn setup_logger() {
-    let file_appender = tracing_appender::rolling::hourly(".", "log.txt");
-    let subscriber = tracing_subscriber::fmt::fmt()
-        .with_writer(file_appender)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
 }

@@ -10,6 +10,7 @@ use std::{
 use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
 
 mod drawing;
+pub mod logging;
 pub mod networking;
 mod terminal_utils;
 
