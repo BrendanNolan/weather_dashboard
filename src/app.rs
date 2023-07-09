@@ -1,4 +1,3 @@
-use crate::{County, WeatherReport, WeatherType};
 use connection_utils::ServerError;
 use crossterm::event::{self, Event as CEvent, KeyCode, KeyEvent};
 use ratatui::widgets::ListState;
@@ -9,6 +8,10 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
+use weather_dashboard::{
+    county::County,
+    weather_report::{WeatherReport, WeatherType},
+};
 
 mod drawing;
 pub mod logging;

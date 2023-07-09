@@ -7,7 +7,10 @@ use ratatui::{
     widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table},
 };
 
-use crate::{County, WeatherReport, WeatherType};
+use weather_dashboard::{
+    county::County,
+    weather_report::{WeatherReport, WeatherType},
+};
 
 pub fn create_county_list_widget<'a>(all_counties: &[County]) -> List<'a> {
     let county_items: Vec<_> = all_counties

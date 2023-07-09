@@ -1,4 +1,3 @@
-use crate::{County, WeatherReport, WeatherType};
 use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -7,6 +6,10 @@ use ratatui::{
     widgets::{Block, Borders, ListState, Tabs},
 };
 use std::collections::HashMap;
+use weather_dashboard::{
+    county::County,
+    weather_report::{WeatherReport, WeatherType},
+};
 
 mod widgets;
 

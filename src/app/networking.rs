@@ -6,7 +6,7 @@ use tokio::{
     sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender},
 };
 
-use crate::{County, WeatherReport};
+use weather_dashboard::{county::County, weather_report::WeatherReport};
 
 pub async fn run_client<Addr: ToSocketAddrs>(
     address: Addr,
