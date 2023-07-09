@@ -5,14 +5,32 @@ use ratatui::widgets::ListState;
 use std::{
     collections::HashMap,
     sync::mpsc::{Receiver as StdReceiver, Sender as StdSender},
+    thread,
     time::{Duration, Instant},
 };
 use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
 
 mod drawing;
 pub mod logging;
-pub mod networking;
+mod networking;
 mod terminal_utils;
+
+pub fn spawn_client() -> Result<tokio::task::JoinHandle<()>, Box<dyn std::error::Error>> {
+    let (tx_results, rx_results) = tokio::sync::mpsc::channel(100);
+    let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
+    let client = tokio::spawn(networking::run_client(
+        "127.0.0.1:6379",
+        rx_county,
+        tx_results,
+    ));
+
+    let (tx_user_input, rx_user_input) = std::sync::mpsc::channel();
+
+    thread::spawn(|| run_user_event_loop(Duration::from_millis(200), tx_user_input));
+    run_app_loop(rx_user_input, tx_county, rx_results)?;
+
+    Ok(client)
+}
 
 pub struct AppState {
     pub active_weather_type: WeatherType,
