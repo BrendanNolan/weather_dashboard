@@ -7,7 +7,10 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tokio::sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender};
+use tokio::{
+    net::ToSocketAddrs,
+    sync::mpsc::{Receiver as TokioReceiver, Sender as TokioSender},
+};
 use weather_dashboard::{
     county::County,
     weather_report::{WeatherReport, WeatherType},
@@ -18,13 +21,13 @@ pub mod logging;
 mod networking;
 mod terminal_utils;
 
-pub fn run_client() -> Result<tokio::task::JoinHandle<()>, Box<dyn std::error::Error>> {
+pub fn run_client<Addr: ToSocketAddrs + Send + 'static>(
+    address: Addr,
+) -> Result<tokio::task::JoinHandle<()>, Box<dyn std::error::Error>> {
     let (tx_results, rx_results) = tokio::sync::mpsc::channel(100);
     let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
     let client = tokio::spawn(networking::run_client_networking(
-        "127.0.0.1:6379",
-        rx_county,
-        tx_results,
+        address, rx_county, tx_results,
     ));
 
     let (tx_user_input, rx_user_input) = std::sync::mpsc::channel();
@@ -189,7 +192,7 @@ fn receive_weather(
 fn send_weather_request(app_state: &AppState, tx_county: &TokioSender<County>) {
     let Some(county) = app_state.get_selected_county() else {
          return;
-     };
+    };
     let tx_county_clone = tx_county.clone();
     tokio::spawn(async move {
         match tx_county_clone.send(county).await {
@@ -197,4 +200,8 @@ fn send_weather_request(app_state: &AppState, tx_county: &TokioSender<County>) {
             Err(error) => tracing::info!("Failed To Send Conunty: {error}"),
         }
     });
+}
+
+pub fn get_socket_address_from_user() -> String {
+    String::from("127.0.0.1:6379") // TODO: Get from a dialog
 }
