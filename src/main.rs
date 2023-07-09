@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal::enable_raw_mode()?;
 
-    app::spawn_client()?.await?;
+    app::run_client()?.await?;
 
     Ok(())
 }

@@ -8,7 +8,7 @@ use tokio::{
 
 use weather_dashboard::{county::County, weather_report::WeatherReport};
 
-pub async fn run_client<Addr: ToSocketAddrs>(
+pub async fn run_client_networking<Addr: ToSocketAddrs>(
     address: Addr,
     rx_county: TokioReceiver<County>,
     tx_results: TokioSender<Result<(County, WeatherReport), ServerError>>,

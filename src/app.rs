@@ -18,10 +18,10 @@ pub mod logging;
 mod networking;
 mod terminal_utils;
 
-pub fn spawn_client() -> Result<tokio::task::JoinHandle<()>, Box<dyn std::error::Error>> {
+pub fn run_client() -> Result<tokio::task::JoinHandle<()>, Box<dyn std::error::Error>> {
     let (tx_results, rx_results) = tokio::sync::mpsc::channel(100);
     let (tx_county, rx_county) = tokio::sync::mpsc::channel(100);
-    let client = tokio::spawn(networking::run_client(
+    let client = tokio::spawn(networking::run_client_networking(
         "127.0.0.1:6379",
         rx_county,
         tx_results,
